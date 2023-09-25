@@ -24,7 +24,7 @@ def pretraitement(path_fic):
 
 if __name__ == '__main__':
     nom_fichier = input(
-        "Tapez le nom du fichier de contrainte (exemple : fichier.txt) :")
+        "Tapez le nom du fichier de contraintes (exemple : fichier.txt) :")
     if nom_fichier[-4:] == ".txt":
         try:
             with open(nom_fichier, 'r') as fic:
