@@ -1,3 +1,6 @@
+from tabulate import tabulate
+
+
 def sup_doublon(list):
     tab = []
     list_elmt = []
@@ -16,7 +19,6 @@ def pretraitement(path_fic):
         previous = list(map(int, values[1:]))
         previous = sup_doublon(previous)
         tab[actual] = previous
-        print(tab)
     return tab
 
 
@@ -27,6 +29,10 @@ if __name__ == '__main__':
         try:
             with open(nom_fichier, 'r') as fic:
                 tab = pretraitement(fic)
+                # Conversion dic to list of list
+                tableau = [[nœud, " ".join(map(str, précédents))]
+                           for nœud, précédents in tab.items()]
+                print(tabulate(tableau, headers=[
+                      "Noeud", "Noeuds Précédents"], tablefmt="grid"))
         except EOFError:
             print("Le fichier n'a pas été trouvé.")
-# /Users/charleschikhani/Documents/S5/AAL/Projet_1/tableaux_test/table 1.txt
