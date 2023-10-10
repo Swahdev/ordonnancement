@@ -1,5 +1,6 @@
 import networkx as nx
 from tabulate import tabulate
+import pandas as pd
 
 
 def pretraitement(path_fic):
@@ -38,8 +39,8 @@ def create_square_empty_matrix(n):
 
 
 def show_matrix(matrix):
-    for ligne in matrix:
-        print(ligne)
+    df = pd.DataFrame(matrix)
+    print(df)
 
 
 def add_element_matrix(matrix, line, colon, p):
@@ -80,6 +81,7 @@ if __name__ == '__main__':
                         add_element_matrix(m, task, successor, data["duration"])
 
                 # Affichage de la matrice
+                print("\n")
                 show_matrix(m)
 
         except EOFError:
