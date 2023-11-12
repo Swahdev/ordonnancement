@@ -47,6 +47,49 @@ def add_element_matrix(matrix, line, colon, p):
     matrix[line][colon] = p
 
 
+def is_sheduldde(a_matrix) :
+    n = len(a_matrix)
+    
+    # Connexité du graphe
+    
+    for i in range(n) :
+        for j in range(n) :
+            if a_matrix[i][j] != a_matrix[j][i] :
+                return False
+    # Fonction rec
+    def is_cyclic_util(c, visited, stack) :
+        visited[c] = True
+        stack[c] = True
+        for neighbor in range(n):
+            if a_matrix[c][neighbor] and not visited[neighbor]:
+                if is_cyclic_util(neighbor, visited, stack):
+                    return True
+            elif stack[neighbor]:
+                return True
+        stack[c] = False
+        return False
+
+    visited = [False] * n
+    stack = [False] * n
+    for node in range(n):
+        if not visited[node]:
+            if is_cyclic_util(node, visited, stack):
+                return False
+    # Vérification du sommet de début et du sommet de fin
+    start_count = 0
+    end_count = 0
+    for i in range(n):
+        if sum(a_matrix[i]) == 0:
+            start_count += 1
+        if all([a_matrix[j][i] == '*' for j in range(n)]):
+            end_count += 1
+
+    if start_count != 1 or end_count != 1:
+        return False
+
+    # Si toutes les conditions sont remplies, le graphe est un graphe d'ordonnancement
+    return True
+    
 if __name__ == '__main__':
     nom_fichier = input(
         "Tapez le nom du fichier de contraintes (exemple : fichier.txt) :")
@@ -83,6 +126,11 @@ if __name__ == '__main__':
                 # Affichage de la matrice
                 print("\n")
                 show_matrix(m)
+                
+                if is_sheduldde(m):
+                    print("Le graphe est un graphe d'ordonnancement.")
+                else:
+                    print("Le graphe n'est pas un graphe d'ordonnancement.")
 
         except EOFError:
             print("Le fichier n'a pas été trouvé.")
