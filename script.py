@@ -46,7 +46,7 @@ def show_matrix(matrix):
 def add_element_matrix(matrix, line, colon, p):
     matrix[line][colon] = p
 
-
+# TODO : A modifier
 def is_sheduldde(a_matrix) :
     n = len(a_matrix)
     
