@@ -15,6 +15,13 @@ def pretraitement(path_fic):
     return tab
 
 
+def is_neg_duration(tab):
+    for task, data in tab.items():
+        if data["duration"] < 0:
+            return True
+    return False
+
+
 def calculate_successors_cycle(tab, graph):
     # Crée un graphe dirigé
 
@@ -65,6 +72,33 @@ def is_connexe(a_matrix, enter):
         return True
     else:
         return False
+
+
+def calculate_ranks(tab):
+    n = len(tab)
+    ranks = [-1] * (n + 1)
+
+    def fct_rang(S):
+        if ranks[S] != -1:
+            return ranks[S]
+
+        if not tab[S]["predecessors"]:
+            ranks[S] = 0
+            return 0
+
+        maxRangPred = -1
+        for X in tab[S]["predecessors"]:
+            rangPred = fct_rang(X)
+            if rangPred > maxRangPred:
+                maxRangPred = rangPred
+
+        ranks[S] = maxRangPred + 1
+        return ranks[S]
+
+    for task in tab.keys():
+        fct_rang(task)
+
+    return ranks[1:]
 
 
 if __name__ == '__main__':
@@ -123,7 +157,7 @@ if __name__ == '__main__':
                     # Utilisez la durée du nœud cible comme poids
                     duration = G.nodes[source]["duration"]
                     print(f"{source} -> {target} = {duration}")
-                
+
                 print("\n")
 
                 # Vérification des conditions :
@@ -151,6 +185,15 @@ if __name__ == '__main__':
 
                 print("\n")
 
+                if (is_neg_duration(tab)):
+                    print("Le graphe possède des arcs négatifs")
+                    print("Ce n'est pas un graphe d’ordonnancement")
+                    exit(1)
+                else:
+                    print("Il n'y a pas d'arcs négatifs")
+
+                print("\n")
+
                 print("Nous vérifions s'il y a un cycle ... \n")
 
                 if (cycle == False):
@@ -162,7 +205,17 @@ if __name__ == '__main__':
 
                 print("C’est un graphe d’ordonnancement\n")
 
-                print("Commençons ")
+                print("Commençons ...")
+
+                # Calcul des rangs
+                ranks = calculate_ranks(tab)
+
+                # Affichage des rangs sous forme de tableau
+                rank_table = [[task, rank]
+                              for task, rank in enumerate(ranks, start=1)]
+                print("\nRangs des sommets :\n")
+                print(tabulate(rank_table, headers=[
+                      "Sommet", "Rang"], tablefmt="grid"))
 
         except EOFError:
             print("Le fichier n'a pas été trouvé.")
