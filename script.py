@@ -46,50 +46,53 @@ def show_matrix(matrix):
 def add_element_matrix(matrix, line, colon, p):
     matrix[line][colon] = p
 
-# TODO : A modifier
-def is_sheduldde(a_matrix) :
+
+def is_connexe(a_matrix, enter):
     n = len(a_matrix)
-    
-    # Connexité du graphe
-    
-    for i in range(n) :
-        for j in range(n) :
-            if a_matrix[i][j] != a_matrix[j][i] :
-                return False
-    # Fonction rec
-    def is_cyclic_util(c, visited, stack) :
-        visited[c] = True
-        stack[c] = True
+
+    def dfs(node, visited):
+        visited[node] = True
         for neighbor in range(n):
-            if a_matrix[c][neighbor] and not visited[neighbor]:
-                if is_cyclic_util(neighbor, visited, stack):
-                    return True
-            elif stack[neighbor]:
-                return True
-        stack[c] = False
-        return False
+            if m[node][neighbor] == 1 and not visited[neighbor]:
+                dfs(neighbor, visited)
 
     visited = [False] * n
-    stack = [False] * n
-    for node in range(n):
-        if not visited[node]:
-            if is_cyclic_util(node, visited, stack):
-                return False
-    # Vérification du sommet de début et du sommet de fin
-    start_count = 0
-    end_count = 0
-    for i in range(n):
-        if sum(a_matrix[i]) == 0:
-            start_count += 1
-        if all([a_matrix[j][i] == '*' for j in range(n)]):
-            end_count += 1
 
-    if start_count != 1 or end_count != 1:
+    dfs(enter, visited)
+
+    if all(visited):
+        return True
+    else:
         return False
 
-    # Si toutes les conditions sont remplies, le graphe est un graphe d'ordonnancement
-    return True
-    
+
+# Utilisation de Bellman-Ford
+
+
+def is_cyclic(a_matrix):
+    # Nombre de sommets dans le graphe
+    n = len(a_matrix)
+
+    # Initialiser les distances à l'infini et la source à 0
+    distances = [float('inf')] * n
+    distances[0] = 0
+
+    # Itérer sur tous les sommets
+    for i in range(n - 1):
+        for u in range(n):
+            for v in range(n):
+                if a_matrix[u][v] != 0 and distances[u] + a_matrix[u][v] < distances[v]:
+                    distances[v] = distances[u] + a_matrix[u][v]
+
+    # Vérifier la présence de cycles
+    for i in range(n):
+        for v in range(n):
+            if a_matrix[i][v] != 0 and distances[i] + a_matrix[i][v] < distances[v]:
+                return True  # Cycle détecté
+
+    return False  # Aucun cycle détecté
+
+
 if __name__ == '__main__':
     nom_fichier = input(
         "Tapez le nom du fichier de contraintes (exemple : fichier.txt) :")
@@ -112,25 +115,58 @@ if __name__ == '__main__':
 
                 # Creation de la matrice
                 m = create_square_empty_matrix(n + 2)
-
+                enter_points = []
+                end_point = []
                 # Remplissage de la matrice en fonction des prérequis
                 for task, data in tab.items():
                     # Si la tâche n'a aucun prédécesseur, alors la première colonne est 0
                     if not data["predecessors"]:
                         add_element_matrix(m, 0, task, 0)
+                        enter_points.append(task)
 
-                    # Si la tâche a des successeurs, alors remplir la matrice avec les poids des successeurs
+                    # Si la tâche a des successeurs, alors remplir la matrice
+                    # avec les poids des successeurs
+                    if not data["successors"]:
+                        end_point.append(task)
+
                     for successor in data["successors"]:
-                        add_element_matrix(m, task, successor, data["duration"])
+                        add_element_matrix(
+                            m, task, successor, data["duration"])
 
                 # Affichage de la matrice
                 print("\n")
                 show_matrix(m)
-                
-                if is_sheduldde(m):
-                    print("Le graphe est un graphe d'ordonnancement.")
+
+                # Vérification des conditions :
+
+                # Existence de points d'entrées et de sorties
+
+                if (len(enter_points) == 0):
+                    print("Il n'y a pas de point d'entrée")
+                    exit(1)
+                if (len(end_point) == 0):
+                    print("Il n'y a pas de point de sortie")
+                    exit(1)
+                if (len(enter_points) == 1):
+                    print("Le point d'entrée est : ", enter_points)
+                elif (len(enter_points) > 1):
+                    print("Les points d'entrées sont ", enter_points)
+                if (len(end_point) == 1):
+                    print("Le point de sortie est : ", end_point)
                 else:
-                    print("Le graphe n'est pas un graphe d'ordonnancement.")
+                    print("Les points de sorties sont ", end_point)
+
+                # Verification des cycles
+
+                if (is_connexe(m, enter_points[0]) == False):
+                    print("Le graphe n'est pas connexe")
+                    exit(1)
+
+                if (is_cyclic(m)):
+                    print("Le graphe est cyclique")
+                    exit(1)
+
+                print("C’est un graphe d’ordonnancement")
 
         except EOFError:
             print("Le fichier n'a pas été trouvé.")
