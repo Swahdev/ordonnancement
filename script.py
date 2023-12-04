@@ -15,19 +15,20 @@ def pretraitement(path_fic):
     return tab
 
 
-def calculate_successors(tab):
+def calculate_successors_cycle(tab, graph):
     # Crée un graphe dirigé
-    G = nx.DiGraph()
 
     # Ajoute les tâches et les arêtes au graphe
     for task, data in tab.items():
-        G.add_node(task, duration=data["duration"])
-        G.add_edges_from([(predecessor, task)
-                         for predecessor in data["predecessors"]])
+        graph.add_node(task, duration=data["duration"])
+        graph.add_edges_from([(predecessor, task)
+                              for predecessor in data["predecessors"]])
 
     # Calcule les successeurs directs de chaque tâche et les stocke dans le dictionnaire "successors"
     for task in tab.keys():
-        tab[task]["successors"] = list(G.successors(task))
+        tab[task]["successors"] = list(graph.successors(task))
+
+    return nx.is_directed_acyclic_graph(graph)
 
 
 def create_square_empty_matrix(n):
@@ -66,33 +67,6 @@ def is_connexe(a_matrix, enter):
         return False
 
 
-# Utilisation de Bellman-Ford
-
-
-def is_cyclic(a_matrix):
-    # Nombre de sommets dans le graphe
-    n = len(a_matrix)
-
-    # Initialiser les distances à l'infini et la source à 0
-    distances = [float('inf')] * n
-    distances[0] = 0
-
-    # Itérer sur tous les sommets
-    for i in range(n - 1):
-        for u in range(n):
-            for v in range(n):
-                if a_matrix[u][v] != 0 and distances[u] + a_matrix[u][v] < distances[v]:
-                    distances[v] = distances[u] + a_matrix[u][v]
-
-    # Vérifier la présence de cycles
-    for i in range(n):
-        for v in range(n):
-            if a_matrix[i][v] != 0 and distances[i] + a_matrix[i][v] < distances[v]:
-                return True  # Cycle détecté
-
-    return False  # Aucun cycle détecté
-
-
 if __name__ == '__main__':
     nom_fichier = input(
         "Tapez le nom du fichier de contraintes (exemple : fichier.txt) :")
@@ -101,8 +75,9 @@ if __name__ == '__main__':
     if nom_fichier[-4:] == ".txt":
         try:
             with open(nom_fichier, 'r') as fic:
+                G = nx.DiGraph()
                 tab = pretraitement(fic)
-                calculate_successors(tab)
+                cycle = calculate_successors_cycle(tab, G)
                 n = len(tab)
 
                 # Crée un tableau à partir des données pour l'affichage
@@ -115,6 +90,7 @@ if __name__ == '__main__':
 
                 # Creation de la matrice
                 m = create_square_empty_matrix(n + 2)
+
                 enter_points = []
                 end_point = []
                 # Remplissage de la matrice en fonction des prérequis
@@ -137,15 +113,30 @@ if __name__ == '__main__':
                 print("\n")
                 show_matrix(m)
 
-                # Vérification des conditions :
+                print("\n")
 
+                # Afficher les arcs
+                print("Arcs du graphe :\n")
+
+                for edge in G.edges():
+                    source, target = edge
+                    # Utilisez la durée du nœud cible comme poids
+                    duration = G.nodes[source]["duration"]
+                    print(f"{source} -> {target} = {duration}")
+                
+                print("\n")
+
+                # Vérification des conditions :
+                print("Vérifions que le graphe vérifie les conditions :\n")
                 # Existence de points d'entrées et de sorties
 
                 if (len(enter_points) == 0):
                     print("Il n'y a pas de point d'entrée")
+                    print("Ce n'est pas un graphe d’ordonnancement")
                     exit(1)
                 if (len(end_point) == 0):
                     print("Il n'y a pas de point de sortie")
+                    print("Ce n'est pas un graphe d’ordonnancement")
                     exit(1)
                 if (len(enter_points) == 1):
                     print("Le point d'entrée est : ", enter_points)
@@ -158,15 +149,20 @@ if __name__ == '__main__':
 
                 # Verification des cycles
 
-                if (is_connexe(m, enter_points[0]) == False):
-                    print("Le graphe n'est pas connexe")
-                    exit(1)
+                print("\n")
 
-                if (is_cyclic(m)):
+                print("Nous vérifions s'il y a un cycle ... \n")
+
+                if (cycle == False):
                     print("Le graphe est cyclique")
+                    print("Ce n'est pas un graphe d’ordonnancement")
                     exit(1)
+                else:
+                    print("Il n'y a pas de cycle")
 
-                print("C’est un graphe d’ordonnancement")
+                print("C’est un graphe d’ordonnancement\n")
+
+                print("Commençons ")
 
         except EOFError:
             print("Le fichier n'a pas été trouvé.")
