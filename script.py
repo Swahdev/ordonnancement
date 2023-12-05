@@ -100,6 +100,7 @@ def calculate_ranks(tab):
 
     return ranks[1:]
 
+
 def calculate_tot(tab):
     n = len(tab)
     tot = [-1] * (n + 1)
@@ -110,13 +111,13 @@ def calculate_tot(tab):
         for i in range(1, n + 1):
             if tot[i] == -1 and all(tot[j] > -1 for j in tab[i]["predecessors"]):
                 if tab[i]["predecessors"]:
-                    tot[i] = max(tot[j] + tab[j]["duration"] for j in tab[i]["predecessors"])
+                    tot[i] = max(tot[j] + tab[j]["duration"]
+                                 for j in tab[i]["predecessors"])
                 else:
                     tot[i] = 0
                 nbc += 1
 
     return tot[1:]
-
 
 
 def calculate_tard(tab, tot, d=float('inf')):
@@ -125,7 +126,7 @@ def calculate_tard(tab, tot, d=float('inf')):
 
     if n == 0:
         return tard[1:]
-    
+
     tard[n] = tot[n - 1] if d == float('inf') else d
 
     visited = set()
@@ -141,11 +142,10 @@ def calculate_tard(tab, tot, d=float('inf')):
             stack.pop()
 
             if tard[current_task] == float('inf'):
-                tard[current_task] = min(tard[j] - tab[current_task]["duration"] for j in tab[current_task]["successors"])
+                tard[current_task] = min(
+                    tard[j] - tab[current_task]["duration"] for j in tab[current_task]["successors"])
 
     return tard[1:]
-
-
 
 
 def calculate_margins(tot, tard):
@@ -156,12 +156,11 @@ def find_critical_path(tab, tot, tard):
     return [i for i in range(1, len(tot) + 1) if tot[i - 1] == tard[i - 1]]
 
 
-
 if __name__ == '__main__':
-    while(1) :
+    while (1):
         nom_fichier = input(
             "\nTapez le nom du fichier de contraintes (exemple : fichier.txt) ou 'Q' pour quitter :")
-        
+
         if nom_fichier == 'Q' or nom_fichier == 'q':
             print("Merci à bientôt !")
             exit(1)
@@ -272,11 +271,11 @@ if __name__ == '__main__':
 
                     # Affichage des rangs sous forme de tableau
                     rank_table = [[task, rank]
-                                for task, rank in enumerate(ranks, start=1)]
+                                  for task, rank in enumerate(ranks, start=1)]
                     print("\nRangs des sommets :\n")
                     print(tabulate(rank_table, headers=[
                         "Sommet", "Rang"], tablefmt="grid"))
-                    
+
                     # Calcul des dates au plus tôt
                     tot_dates = calculate_tot(tab)
                     print("\nDates au plus tôt :", tot_dates)
@@ -290,14 +289,16 @@ if __name__ == '__main__':
                     print("\nMarges totales :", margins)
 
                     # Identification du chemin critique
-                    critical_path = find_critical_path(tab, tot_dates, tard_dates)
+                    critical_path = find_critical_path(
+                        tab, tot_dates, tard_dates)
                     print("\nChemin critique :", critical_path)
 
             except EOFError:
-                
+
                 print("Un problème est survenu. Veuillez réessayer.")
                 continue
-            
+
             except FileNotFoundError:
-                print(f"Le fichier {nom_fichier} n'a pas été trouvé. Veuillez réessayer.")
+                print(
+                    f"Le fichier {nom_fichier} n'a pas été trouvé. Veuillez réessayer.")
                 continue
