@@ -55,25 +55,6 @@ def add_element_matrix(matrix, line, colon, p):
     matrix[line][colon] = p
 
 
-def is_connexe(a_matrix, enter):
-    n = len(a_matrix)
-
-    def dfs(node, visited):
-        visited[node] = True
-        for neighbor in range(n):
-            if m[node][neighbor] == 1 and not visited[neighbor]:
-                dfs(neighbor, visited)
-
-    visited = [False] * n
-
-    dfs(enter, visited)
-
-    if all(visited):
-        return True
-    else:
-        return False
-
-
 def calculate_ranks(tab):
     n = len(tab)
     ranks = [-1] * (n + 1)
