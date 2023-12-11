@@ -133,7 +133,7 @@ def calculate_margins(tot, tard):
     return [tard[i] - tot[i] for i in range(len(tot))]
 
 
-def find_critical_path(tab, tot, tard):
+def find_critical_path(tot, tard):
     return [i for i in range(1, len(tot) + 1) if tot[i - 1] == tard[i - 1]]
 
 
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
                     for edge in G.edges():
                         source, target = edge
-                        # Utilisez la durée du nœud cible comme poids
+                        # Utilisez la durée du noeud cible comme poids
                         duration = G.nodes[source]["duration"]
                         print(f"{source} -> {target} = {duration}")
 
@@ -270,8 +270,7 @@ if __name__ == '__main__':
                     print("\nMarges totales :", margins)
 
                     # Identification du chemin critique
-                    critical_path = find_critical_path(
-                        tab, tot_dates, tard_dates)
+                    critical_path = find_critical_path(tot_dates, tard_dates)
                     print("\nChemin critique :", critical_path)
 
             except EOFError:
